@@ -122,13 +122,25 @@ class Section1:
 
         results=u.train_simple_classifier_with_cv(Xtrain=X,ytrain=y,
                                           clf=DecisionTreeClassifier(random_state=60),
-                                          cv=KFold(n_splits=5,random_state=60, shuffle=True))
+                                          cv=KFold(n_splits=5,shuffle=True,random_state=60))
         answer = {}
-        answer["clf"] = None  # the estimator (classifier instance)
-        answer["cv"] = None  # the cross validator instance
+        answer["clf"] = DecisionTreeClassifier(random_state=60)  # the estimator (classifier instance)
+        answer["cv"] = KFold(n_splits=5,shuffle=True,random_state=60)  # the cross validator instance
+        
         # the dictionary with the scores  (a dictionary with
         # keys: 'mean_fit_time', 'std_fit_time', 'mean_accuracy', 'std_accuracy'.
-        answer["scores"] = None
+
+        cv_dict={}
+        #for key, array in results.items():
+        #    if key in ['fit_time', 'test_score']:
+        #        cv_dict['mean_'+key]= array.mean()
+        #        cv_dict['std_'+key]= array.std()
+        cv_dict['mean_fit_time']=results['fit_time'].mean()
+        cv_dict['std_fit_time']=results['fit_time'].std()
+        cv_dict['mean_accuracy']=results['test_score'].mean()
+        cv_dict['std_accuracy']=results['test_score'].std()
+                
+        answer["scores"] = cv_dict
         return answer
 
     # ---------------------------------------------------------
@@ -146,10 +158,21 @@ class Section1:
 
         # Answer: same structure as partC, except for the key 'explain_kfold_vs_shuffle_split'
 
+        results=u.train_simple_classifier_with_cv(Xtrain=X,ytrain=y,
+                                          clf=DecisionTreeClassifier(random_state=60),
+                                          cv=ShuffleSplit(n_splits=5,random_state=60))
         answer = {}
-        answer["clf"] = None
-        answer["cv"] = None
-        answer["scores"] = None
+
+        answer["clf"] = DecisionTreeClassifier(random_state=60)
+        answer["cv"] = ShuffleSplit(n_splits=5,random_state=60)
+        
+        cv_dict={}
+        cv_dict['mean_fit_time']=results['fit_time'].mean()
+        cv_dict['std_fit_time']=results['fit_time'].std()
+        cv_dict['mean_accuracy']=results['test_score'].mean()
+        cv_dict['std_accuracy']=results['test_score'].std()
+        
+        answer["scores"] = cv_dict
         answer["explain_kfold_vs_shuffle_split"] = None
         return answer
 
@@ -168,8 +191,25 @@ class Section1:
         # Answer: built on the structure of partC
         # `answer` is a dictionary with keys set to each split, in this case: 2, 5, 8, 16
         # Therefore, `answer[k]` is a dictionary with keys: 'scores', 'cv', 'clf`
-
+       
         answer = {}
+
+        for k in [2,5,8,16]:
+            clf=DecisionTreeClassifier(random_state=60)
+            cv=ShuffleSplit(n_splits=k,random_state=60)
+            
+            results=u.train_simple_classifier_with_cv(Xtrain=X,ytrain=y,
+                                          clf=clf,
+                                          cv=cv)
+            cv_dict={}
+            cv_dict['mean_accuracy']=results['test_score'].mean()
+            cv_dict['std_accuracy']=results['test_score'].std()
+            answer[k]={}
+            answer[k]['clf']=clf
+            answer[k]['cv']=cv
+            answer[k]['scores']=cv_dict
+            
+            
 
         # Enter your code, construct the `answer` dictionary, and return it.
 
@@ -196,8 +236,43 @@ class Section1:
         y: NDArray[np.int32],
     ) -> dict[str, Any]:
         """ """
+        clf_RF=RandomForestClassifier(random_state=60)
+        cv=ShuffleSplit(n_splits=5,random_state=60)
+        
+        results=u.train_simple_classifier_with_cv(Xtrain=X,ytrain=y,
+                                          clf=clf_RF,
+                                          cv=cv)
 
+        cv_dict={}
+        cv_dict['mean_fit_time']=results['fit_time'].mean()
+        cv_dict['std_fit_time']=results['fit_time'].std()
+        cv_dict['mean_accuracy']=results['test_score'].mean()
+        cv_dict['std_accuracy']=results['test_score'].std()
+
+        part_D=Section1().partD(X,y)
+        
         answer = {}
+
+        answer["clf_RF"] = clf_RF
+        answer["clf_DT"] = part_D['clf']
+        answer["cv"] = ShuffleSplit(n_splits=5,random_state=60)
+        answer["scores_RF"] = cv_dict
+        answer["scores_DT"] = part_D['scores']
+
+        if cv_dict['mean_accuracy'] > part_D['scores']['mean_accuracy']:
+            answer["model_highest_accuracy"]='Random Forest'
+        else:
+            answer["model_highest_accuracy"]='Decision Tree'
+       
+        if cv_dict['std_accuracy'] < part_D['scores']['std_accuracy']:
+            answer["model_lowest_variance"]=cv_dict['std_accuracy']
+        else:
+            answer["model_lowest_variance"]=part_D['scores']['std_accuracy']
+
+        if cv_dict['mean_fit_time'] < part_D['scores']['mean_fit_time']:
+            answer["model_fastest"]=cv_dict['mean_fit_time']
+        else:
+            answer["model_fastest"]=part_D['scores']['mean_fit_time']
 
         # Enter your code, construct the `answer` dictionary, and return it.
 
@@ -270,7 +345,19 @@ class Section1:
 
         answer = {}
 
-        # Enter your code, construct the `answer` dictionary, and return it.
+        clf=RandomForestClassifier(random_state=60)
+        cv=ShuffleSplit(n_splits=5,random_state=60)
+        param_grid = { 'criterion': ['gini', 'entropy'],
+                        'max_depth': [10, 20, None],
+                        'min_samples_split': [2, 5, 10],
+                        'min_samples_leaf': [1, 2, 4],
+                        'max_features': ['auto', 'sqrt', 'log2', None]
+                    }
+        grid_search = GridSearchCV(clf, param_grid, cv=cv, n_jobs=-1, verbose=2)
+
+        grid_search.fit(X,y)
+
+        
 
         """
            `answer`` is a dictionary with the following keys: 
