@@ -96,12 +96,12 @@ class Section1:
 
         # Enter your code and fill the `answer` dictionary
 
-        answer["length_Xtrain"] = None  # Number of samples
-        answer["length_Xtest"] = None
-        answer["length_ytrain"] = None
-        answer["length_ytest"] = None
-        answer["max_Xtrain"] = None
-        answer["max_Xtest"] = None
+        answer["length_Xtrain"] = len(Xtrain)  
+        answer["length_Xtest"] = len(Xtest)
+        answer["length_ytrain"] = len(ytrain)
+        answer["length_ytest"] = len(ytest)
+        answer["max_Xtrain"] = Xtrain.max()
+        answer["max_Xtest"] = Xtest.max()
         return answer, Xtrain, ytrain, Xtest, ytest
 
     """
@@ -120,6 +120,9 @@ class Section1:
     ):
         # Enter your code and fill the `answer` dictionary
 
+        results=u.train_simple_classifier_with_cv(Xtrain=X,ytrain=y,
+                                          clf=DecisionTreeClassifier(random_state=60),
+                                          cv=KFold(n_splits=5,random_state=60, shuffle=True))
         answer = {}
         answer["clf"] = None  # the estimator (classifier instance)
         answer["cv"] = None  # the cross validator instance

@@ -10,3 +10,11 @@
   
      import new_utils as nu
 """
+import numpy as np
+from typing import Type, Dict
+from numpy.typing import NDArray
+
+def scale_data(X):
+    X = X.astype(float)
+    X = X / X.max()
+    return X
