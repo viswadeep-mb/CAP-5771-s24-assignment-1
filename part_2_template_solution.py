@@ -4,6 +4,15 @@
 import numpy as np
 from numpy.typing import NDArray
 from typing import Any
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import (
+    ShuffleSplit,
+    cross_validate,
+    KFold,
+)
+import utils as u
+import new_utils as nu
 
 # ======================================================================
 
@@ -69,8 +78,25 @@ class Section2:
         # return values:
         # Xtrain, ytrain, Xtest, ytest: the data used to fill the `answer`` dictionary
 
-        Xtrain = Xtest = np.zeros([1, 1], dtype="float")
-        ytrain = ytest = np.zeros([1], dtype="int")
+
+        Xtrain, ytrain, Xtest, ytest = u.prepare_data()
+        Xtrain = nu.scale_data(Xtrain)
+        Xtest = nu.scale_data(Xtest)
+        
+        answer = {}
+        answer["nb_classes_train"] = len(np.unique(ytrain))
+        answer["nb_classes_test"] = len(np.unique(ytest))
+        answer["class_count_train"] = np.bincount(ytrain)
+        answer["class_count_test"] = np.bincount(ytest)
+        answer["length_Xtrain"] = len(Xtrain)
+        answer["length_Xtest"] = len(Xtest)
+        answer["length_ytrain"] = len(ytrain)
+        answer["length_ytest"] = len(ytest)
+        answer["max_Xtrain"] = Xtrain.max()
+        answer["max_Xtest"] = Xtest.max()
+        
+        #Xtrain = Xtest = np.zeros([1, 1], dtype="float")
+        #ytrain = ytest = np.zeros([1], dtype="int")
 
         return answer, Xtrain, ytrain, Xtest, ytest
 
@@ -101,7 +127,91 @@ class Section2:
     ) -> dict[int, dict[str, Any]]:
         """ """
         # Enter your code and fill the `answer`` dictionary
+
         answer = {}
+        train_list = ntrain_list
+        test_list = ntest_list
+        for i in range(0,len(train_list)):
+            train_val = train_list[i]
+            test_val= test_list[i]
+            Xtrain = X[:train_val]
+            ytrain = y[:train_val]
+            Xtest = Xtest[:test_val]
+            ytest = ytest[:test_val]
+            
+            partC = {}
+            dt_clf=DecisionTreeClassifier(random_state=self.seed)
+            K_cv=KFold(n_splits=5,shuffle=True,random_state=self.seed)
+            partC_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
+                                              clf=dt_clf,
+                                              cv=K_cv)
+            
+            partC["clf"] = dt_clf 
+            partC["cv"] = K_cv  
+            partC_scores={}
+            partC_scores['mean_fit_time']=partC_results['fit_time'].mean()
+            partC_scores['std_fit_time']=partC_results['fit_time'].std()
+            partC_scores['mean_accuracy']=partC_results['test_score'].mean()
+            partC_scores['std_accuracy']=partC_results['test_score'].std()
+                    
+            partC["scores"] = partC_scores
+    
+            partD = {}
+            Sh_cv=ShuffleSplit(n_splits=5,random_state=self.seed)
+            partD_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
+                                              clf=dt_clf,
+                                              cv=Sh_cv)
+    
+            partD["clf"] = dt_clf
+            partD["cv"] = Sh_cv
+            
+            partD_scores={}
+            partD_scores['mean_fit_time']=partD_results['fit_time'].mean()
+            partD_scores['std_fit_time']=partD_results['fit_time'].std()
+            partD_scores['mean_accuracy']=partD_results['test_score'].mean()
+            partD_scores['std_accuracy']=partD_results['test_score'].std()
+            
+            partD["scores"] = partD_scores
+    
+    
+            partF={}
+            
+            clf_LR=LogisticRegression(random_state=self.seed,max_iter=100)
+            
+            partF_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
+                                              clf=clf_LR,
+                                              cv=Sh_cv)
+    
+            partF_scores={}
+            partF_scores['mean_fit_time']=partF_results['fit_time'].mean()
+            partF_scores['std_fit_time']=partF_results['fit_time'].std()
+            partF_scores['mean_accuracy']=partF_results['test_score'].mean()
+            partF_scores['std_accuracy']=partF_results['test_score'].std()
+            
+    
+            partF["clf_LR"] = clf_LR
+            partF["clf_DT"] = dt_clf
+            partF["cv"] = Sh_cv
+            partF["scores_LR"] = partF_scores
+            partF["scores_DT"] = partD_scores
+    
+            if partF_scores['mean_accuracy'] > partD_scores['mean_accuracy']:
+                partF["model_highest_accuracy"]='Logistic Regression'
+            else:
+                partF["model_highest_accuracy"]='Decision Tree'
+           
+            partF["model_lowest_variance"]=min(partF_scores['std_accuracy']**2,partD_scores['std_accuracy']**2)
+    
+            partF["model_fastest"]=min(partF_scores['mean_fit_time'], partD_scores['mean_fit_time'])
+        
+            answer[train_list[i]] = {}
+            answer[train_list[i]]["partC"] = partC
+            answer[train_list[i]]["partD"] = partD
+            answer[train_list[i]]["partF"] = partF
+            answer[train_list[i]]["ntrain"] = train_list[i]
+            answer[train_list[i]]["ntest"] = test_list[i]
+            answer[train_list[i]]["class_count_train"] = list(np.bincount(y))
+            answer[train_list[i]]["class_count_test"] = list(np.bincount(ytest))
 
         """
         `answer` is a dictionary with the following keys:

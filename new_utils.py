@@ -24,6 +24,17 @@ def scale_data(X):
     X = X / X.max()
     return X
 
+
+def conf_mat_accuracy(matrix):
+    """
+    Calculate accuracy from a confusion matrix.
+    """
+    TruePositive = matrix[1, 1]  
+    TrueNegative = matrix[0, 0]  
+    total_samples = matrix.sum()
+    accuracy = (TruePositive+ TrueNegative) / total_samples
+    return accuracy
+
 def train_simple_classifier_with_cv(
     *,
     Xtrain: NDArray[np.floating],
