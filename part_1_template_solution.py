@@ -254,13 +254,13 @@ class Section1:
         cv_dict['mean_accuracy']=results['test_score'].mean()
         cv_dict['std_accuracy']=results['test_score'].std()
 
-        part_D=Section1(seed=self.seed).partD(X,y)
+        part_D=self.partD(X,y)
         
         answer = {}
 
         answer["clf_RF"] = clf_RF
         answer["clf_DT"] = part_D['clf']
-        answer["cv"] = ShuffleSplit(n_splits=5,random_state=self.seed)
+        answer["cv"] = cv
         answer["scores_RF"] = cv_dict
         answer["scores_DT"] = part_D['scores']
 
@@ -370,7 +370,7 @@ class Section1:
 
         grid_search.fit(X,y)
 
-        best_clf = grid_search.best_estimator_ = grid_search.best_estimator_
+        best_clf = grid_search.best_estimator_
 
         # Predictions with the best model
         y_train_pred_bst = best_clf.predict(X)

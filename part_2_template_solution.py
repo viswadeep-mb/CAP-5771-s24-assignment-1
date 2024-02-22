@@ -13,7 +13,7 @@ from sklearn.model_selection import (
 )
 import utils as u
 import new_utils as nu
-
+from sklearn.metrics import accuracy_score, confusion_matrix
 # ======================================================================
 
 # I could make Section 2 a subclass of Section 1, which would facilitate code reuse.
@@ -145,9 +145,7 @@ class Section2:
             partC_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
                                               clf=dt_clf,
                                               cv=K_cv)
-            
-            partC["clf"] = dt_clf 
-            partC["cv"] = K_cv  
+
             partC_scores={}
             partC_scores['mean_fit_time']=partC_results['fit_time'].mean()
             partC_scores['std_fit_time']=partC_results['fit_time'].std()
@@ -155,16 +153,17 @@ class Section2:
             partC_scores['std_accuracy']=partC_results['test_score'].std()
                     
             partC["scores"] = partC_scores
+            partC["clf"] = dt_clf 
+            partC["cv"] = K_cv  
+            
+            
     
             partD = {}
             Sh_cv=ShuffleSplit(n_splits=5,random_state=self.seed)
             partD_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
                                               clf=dt_clf,
                                               cv=Sh_cv)
-    
-            partD["clf"] = dt_clf
-            partD["cv"] = Sh_cv
-            
+
             partD_scores={}
             partD_scores['mean_fit_time']=partD_results['fit_time'].mean()
             partD_scores['std_fit_time']=partD_results['fit_time'].std()
@@ -173,46 +172,41 @@ class Section2:
             
             partD["scores"] = partD_scores
     
+            partD["clf"] = dt_clf
+            partD["cv"] = Sh_cv
+            
+            
+    
     
             partF={}
             
-            clf_LR=LogisticRegression(random_state=self.seed,max_iter=100)
+            clf_LR=LogisticRegression(random_state=self.seed,max_iter=300)
             
             partF_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
                                               clf=clf_LR,
                                               cv=Sh_cv)
-    
-            partF_scores={}
-            partF_scores['mean_fit_time']=partF_results['fit_time'].mean()
-            partF_scores['std_fit_time']=partF_results['fit_time'].std()
-            partF_scores['mean_accuracy']=partF_results['test_score'].mean()
-            partF_scores['std_accuracy']=partF_results['test_score'].std()
-            
-    
-            partF["clf_LR"] = clf_LR
-            partF["clf_DT"] = dt_clf
-            partF["cv"] = Sh_cv
-            partF["scores_LR"] = partF_scores
-            partF["scores_DT"] = partD_scores
-    
-            if partF_scores['mean_accuracy'] > partD_scores['mean_accuracy']:
-                partF["model_highest_accuracy"]='Logistic Regression'
-            else:
-                partF["model_highest_accuracy"]='Decision Tree'
-           
-            partF["model_lowest_variance"]=min(partF_scores['std_accuracy']**2,partD_scores['std_accuracy']**2)
-    
-            partF["model_fastest"]=min(partF_scores['mean_fit_time'], partD_scores['mean_fit_time'])
-        
-            answer[train_list[i]] = {}
-            answer[train_list[i]]["partC"] = partC
-            answer[train_list[i]]["partD"] = partD
-            answer[train_list[i]]["partF"] = partF
-            answer[train_list[i]]["ntrain"] = train_list[i]
-            answer[train_list[i]]["ntest"] = test_list[i]
-            answer[train_list[i]]["class_count_train"] = list(np.bincount(y))
-            answer[train_list[i]]["class_count_test"] = list(np.bincount(ytest))
+            clf_LR.fit(Xtrain, ytrain)
 
+            partF['scores_train_F'] = accuracy_score(ytrain, clf_LR.predict(Xtrain))
+            partF['scores_test_F'] = accuracy_score(ytest, clf_LR.predict(Xtest))
+                    
+            partF['mean_cv_accuracy_F']=partF_results['test_score'].mean()
+
+            partF["clf_LR"] = clf_LR
+            partF["cv"] = Sh_cv
+
+            partF['conf_mat_train'] = confusion_matrix(ytrain, clf_LR.predict(Xtrain))
+            partF['conf_mat_test'] = confusion_matrix(ytest, clf_LR.predict(Xtest))
+
+        
+            answer[train_val] = {}
+            answer[train_val]["partC"] = partC
+            answer[train_val]["partD"] = partD
+            answer[train_val]["partF"] = partF
+            answer[train_val]["ntrain"] = train_val
+            answer[train_val]["ntest"] = test_val
+            answer[train_val]["class_count_train"] = list(np.bincount(ytrain))
+            answer[train_val]["class_count_test"] = list(np.bincount(ytest))
         """
         `answer` is a dictionary with the following keys:
            - 1000, 5000, 10000: each key is the number of training samples
