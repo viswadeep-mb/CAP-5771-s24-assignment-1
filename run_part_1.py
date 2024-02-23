@@ -151,16 +151,16 @@ if __name__ == "__main__":
 
     ################################################
     # In real code, read MNIST files and define Xtrain and xtest appropriately
-    #X = np.random.rand(120, 120)  # 100 samples, 100 features
-    ## Fill labels with 0 and 1 (mimic 7 and 9s)
-    #y = (X[:, :5].sum(axis=1) > 2.5).astype(int)
-    #n_train = 100
-    #Xtrain = X[0:n_train, :]
-    #Xtest = X[n_train:, :]
-    #ytrain = y[0:n_train]
-    #ytest = y[n_train:]
-    #X = Xtrain
-    #y = ytrain
+    X = np.random.rand(120, 120)  # 100 samples, 100 features
+    # Fill labels with 0 and 1 (mimic 7 and 9s)
+    y = (X[:, :5].sum(axis=1) > 2.5).astype(int)
+    n_train = 100
+    Xtrain = X[0:n_train, :]
+    Xtest = X[n_train:, :]
+    ytrain = y[0:n_train]
+    ytest = y[n_train:]
+    X = Xtrain
+    y = ytrain
     ##############################################
 
     # Attention: the seed should never be changed. If it is, automatic grading
