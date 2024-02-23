@@ -48,7 +48,7 @@ class Section3:
         print(f"{uniq=}")
         print(f"{counts=}")
         print(f"{np.sum(counts)=}")
-
+        c={}
         for i, j in enumerate(counts):
             c[uniq[i]] = j
             
@@ -111,8 +111,8 @@ class Section3:
         answer["clf"] = clf
         answer["plot_k_vs_score_train"] = tuple_plot_scores_train
         answer["plot_k_vs_score_test"] = tuple_plot_scores_test
-        answer["text_rate_accuracy_change"] = "The model consistently demonstrates positive improvements in accuracy as the value of k increases for the testing data, suggesting that the model becomes increasingly proficient in predicting the top-k classes"
-        answer["text_is_topk_useful_and_why"] = "The top-k accuracy metric is valuable for evaluating the model's performance as it assesses its capability to make accurate predictions across a broader spectrum of potential classes. This metric extends beyond conventional accuracy measures, providing a deeper understanding of the model's effectiveness in capturing relevant patterns."
+        answer["text_rate_accuracy_change"] = "As the value of k rises for the testing data, the model consistently exhibits enhanced accuracy, implying an increasing proficiency in predicting the top-k classes."
+        answer["text_is_topk_useful_and_why"] = "The top-k accuracy metric proves valuable in assessing the model's performance by evaluating its ability to make accurate predictions across a wider range of potential classes. This metric goes beyond traditional accuracy measures, offering a more comprehensive insight into the model's effectiveness in capturing pertinent patterns."
 
         """
         # `answer` is a dictionary with the following keys:
@@ -206,7 +206,7 @@ class Section3:
 
         #partB_answer,X,y,Xtest,ytest = self.partB(X=X,y=y,Xtest=Xtest,ytest=ytest)
 
-        clf=SVC(random_state=self.seed,kernel='linear')
+        clf=SVC(random_state=self.seed)
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=self.seed)
 
         scoring = {'f1': make_scorer(f1_score, average='macro'),
@@ -236,11 +236,12 @@ class Section3:
 
 
         if scores_cv_stra['mean_precision'] > scores_cv_stra['mean_recall']:
-            answer["is_precision_higher_than_recall"]= 'Precision'
+            answer["is_precision_higher_than_recall"]= True
         else:
-            answer["is_precision_higher_than_recall"]= 'recall'
+            answer["is_precision_higher_than_recall"]= False
 
-        #answer["explain_is_precision_higher_than_recall"] : 'a string'
+        answer['explain_is_precision_higher_than_recall']='Yes, Precision is higher than recall  suggests that the classifier is more adept at minimizing false positive errors, emphasizing its accuracy in correctly identifying positive instances.'
+       
 
         answer['confusion_matrix_train'] = confusion_matrix(y,y_pred_train)
         answer['confusion_matrix_test']  = confusion_matrix(ytest,y_pred_test)
@@ -287,7 +288,7 @@ class Section3:
 
         class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(y), y=y)
 
-        clf= SVC(random_state=self.seed, kernel='linear', class_weight={0: class_weights[0], 1: class_weights[1]})
+        clf= SVC(random_state=self.seed, class_weight={0: class_weights[0], 1: class_weights[1]})
 
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=self.seed)
 
@@ -330,8 +331,8 @@ class Section3:
         answer['class_weights'] = class_weights
         answer['confusion_matrix_train'] = confusion_matrix_train_wt
         answer['confusion_matrix_test'] = confusion_matrix_test_wt
-        answer['explain_purpose_of_class_weights'] = "The class weights are used to address class imbalance by penalizing misclassifications of the minority class more heavily."
-        answer['explain_performance_difference'] = "The performance difference observed with class weights reflects the model's improved ability to generalize to the minority class, leading to more balanced performance metrics across all classes."
+        answer['explain_purpose_of_class_weights'] = "Class weights are employed to mitigate class imbalance by assigning greater penalties to misclassifications of the minority class."
+        answer['explain_performance_difference'] = "The performance difference attributed to class weights indicates an enhanced capability of the model to generalize to the minority class, resulting in more balanced performance metrics across all classe"
 
         """
         Answer is a dictionary with the following keys: 

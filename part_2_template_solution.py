@@ -134,14 +134,14 @@ class Section2:
         for i in range(0,len(train_list)):
             train_val = train_list[i]
             test_val= test_list[i]
-            Xtrain = X[:train_val]
-            ytrain = y[:train_val]
-            Xtest = Xtest[:test_val]
-            ytest = ytest[:test_val]
+            Xtrain = X[0:train_val, :]
+            ytrain = y[0:train_val]
+            Xtest = Xtest[0:test_val, :]
+            ytest = ytest[0:test_val]
             
             partC = {}
             dt_clf=DecisionTreeClassifier(random_state=self.seed)
-            K_cv=KFold(n_splits=5,shuffle=True,random_state=self.seed)
+            K_cv=KFold(n_splits=5,random_state=self.seed,shuffle=True)
             partC_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
                                               clf=dt_clf,
                                               cv=K_cv)

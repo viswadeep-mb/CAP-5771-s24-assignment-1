@@ -20,8 +20,8 @@ from sklearn.model_selection import (
 )
 
 def scale_data(X):
-    X = X.astype(float)
-    X = X / X.max()
+    #X = X.astype(float)
+    X = (X - X.min()) / (X.max() - X.min())
     return X
 
 
