@@ -269,9 +269,15 @@ class Section1:
         else:
             answer["model_highest_accuracy"]='Decision Tree'
        
-        answer["model_lowest_variance"]=min(cv_dict['std_accuracy']**2,part_D['scores']['std_accuracy']**2)
+        if cv_dict['std_accuracy']**2 < part_D['scores']['std_accuracy']**2 :
+            answer["model_lowest_variance"]='Random Forest'
+        else:
+            answer["model_lowest_variance"]='Decision Tree'
 
-        answer["model_fastest"]=min(cv_dict['mean_fit_time'], part_D['scores']['mean_fit_time'])
+        if cv_dict['mean_fit_time'] < part_D['scores']['mean_fit_time']:
+            answer["model_fastest"]='Random Forest'
+        else:
+            answer["model_fastest"]='Decision Tree'
 
 
         # Enter your code, construct the `answer` dictionary, and return it.
