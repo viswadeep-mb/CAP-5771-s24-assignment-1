@@ -152,7 +152,7 @@ class Section2:
             partC_scores['mean_accuracy']=partC_results['test_score'].mean()
             partC_scores['std_accuracy']=partC_results['test_score'].std()
                     
-            partC["scores"] = partC_scores
+            partC["scores_C"] = partC_scores
             partC["clf"] = dt_clf 
             partC["cv"] = K_cv  
             
@@ -170,7 +170,7 @@ class Section2:
             partD_scores['mean_accuracy']=partD_results['test_score'].mean()
             partD_scores['std_accuracy']=partD_results['test_score'].std()
             
-            partD["scores"] = partD_scores
+            partD["scores_D"] = partD_scores
     
             partD["clf"] = dt_clf
             partD["cv"] = Sh_cv
@@ -182,17 +182,24 @@ class Section2:
             
             clf_LR=LogisticRegression(random_state=self.seed,max_iter=300)
             
-            partF_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
+            '''partF_results=u.train_simple_classifier_with_cv(Xtrain=Xtrain,ytrain=ytrain,
                                               clf=clf_LR,
-                                              cv=Sh_cv)
+                                              cv=Sh_cv)'''
+
+            partF_results = cross_validate(clf_LR,Xtrain, ytrain, cv=Sh_cv, return_train_score=True)
+
+            
             clf_LR.fit(Xtrain, ytrain)
 
-            partF['scores_train_F'] = accuracy_score(ytrain, clf_LR.predict(Xtrain))
-            partF['scores_test_F'] = accuracy_score(ytest, clf_LR.predict(Xtest))
+            #partF['scores_train_F'] = accuracy_score(ytrain, clf_LR.predict(Xtrain))
+            #partF['scores_test_F'] = accuracy_score(ytest, clf_LR.predict(Xtest))
+
+            partF['scores_train_F']= clf_LR.score(Xtrain,ytrain)
+            partF['scores_test_F'] = clf_LR.score(Xtest,ytest)
                     
             partF['mean_cv_accuracy_F']=partF_results['test_score'].mean()
 
-            partF["clf_LR"] = clf_LR
+            partF["clf"] = clf_LR
             partF["cv"] = Sh_cv
 
             partF['conf_mat_train'] = confusion_matrix(ytrain, clf_LR.predict(Xtrain))
